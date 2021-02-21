@@ -12,8 +12,20 @@ const types = ['product', 'coupon', 'user']
 
 export const start = async () => {
   const rootSchema = `
+    type Cat {
+      name: String,
+      age: Int!,
+      nickName: String!
+      bestFriend: [Cat]
+    }
+
+    type _Query {
+      myCat: Cat,
+      hello: String
+    }
+
     schema {
-      query: Query
+      query: _Query
       mutation: Mutation
     }
   `
@@ -21,7 +33,22 @@ export const start = async () => {
 
   const server = new ApolloServer({
     typeDefs: [rootSchema, ...schemaTypes],
-    resolvers: merge({}, product, coupon, user),
+    resolvers: merge(
+      {
+        _Query: {
+          myCat() {
+            return { name: 'Garfield', age: 28, nickName: 'little kitty' }
+          },
+
+          hello() {
+            return 'hello GraphQl'
+          }
+        }
+      },
+      product,
+      coupon,
+      user
+    ),
     async context({ req }) {
       const user = await authenticate(req)
       return { user }
